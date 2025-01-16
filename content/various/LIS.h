@@ -7,20 +7,43 @@
  */
 #pragma once
 
-template<class I> vi lis(const vector<I>& S) {
-	if (S.empty()) return {};
-	vi prev(sz(S));
-	typedef pair<I, int> p;
-	vector<p> res;
-	rep(i,0,sz(S)) {
-		// change 0 -> i for longest non-decreasing subsequence
-		auto it = lower_bound(all(res), p{S[i], 0});
-		if (it == res.end()) res.emplace_back(), it = res.end()-1;
-		*it = {S[i], i};
-		prev[i] = it == res.begin() ? 0 : (it-1)->second;
-	}
-	int L = sz(res), cur = res.back().second;
-	vi ans(L);
-	while (L--) ans[L] = cur, cur = prev[cur];
-	return ans;
+// Complexity: O(nlog(n))
+int lis(int n, vector<int> &a) {
+    vector<int> d(n+1, INF);
+    d[0] = -INF;
+    for(int i = 0; i < n; i++) {
+        int idx = lower_bound(d.begin(), d.end(), a[i]) - d.begin();
+        d[idx] = a[i];
+    }
+    int ans = 1;
+    for(int i = 1; i <= n; i++)if(d[i] < INF)ans = i;
+    return ans;
+}
+
+// Cp-Algo Complexity: O(n^2)
+vector<int> lis(vector<int> const& a) {
+    int n = a.size();
+    vector<int> d(n, 1), p(n, -1);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < i; j++) {
+            if (a[j] < a[i] && d[i] < d[j] + 1) {
+                d[i] = d[j] + 1;
+                p[i] = j;
+            }
+        }
+    }
+    int ans = d[0], pos = 0;
+    for (int i = 1; i < n; i++) {
+        if (d[i] > ans) {
+            ans = d[i];
+            pos = i;
+        }
+    }
+    vector<int> sq;
+    while (pos != -1) {
+        sq.push_back(a[pos]);
+        pos = p[pos];
+    }
+    reverse(sq.begin(), sq.end());
+    return sq;
 }
