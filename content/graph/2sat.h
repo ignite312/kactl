@@ -1,5 +1,5 @@
 /**
- * Author: Emil Lenngren, Simon Lindholm
+ * Author: Emon
  * Date: 2011-11-29
  * License: CC0
  * Source: folklore

@@ -1,5 +1,5 @@
 /**
- * Author: Ulf Lundstrom
+ * Author: Emon
  * Date: 2009-02-26
  * License: CC0
  * Source: My head with inspiration from tinyKACTL

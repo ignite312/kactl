@@ -1,5 +1,5 @@
 /**
- * Author: Simon Lindholm
+ * Author: Emon
  * Date: 2015-02-23
  * License: CC0
  * Source: http://en.wikipedia.org/wiki/Bellman-Ford_algorithm

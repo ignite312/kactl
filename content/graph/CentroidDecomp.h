@@ -1,8 +1,8 @@
 /**
- * Author: Farhan
- * Description: Centroid decompose
+ * Author: Emon
+ * Description: Centroid decompose, Finding 1 to K length Path
+ * Source : https://www.codechef.com/problems/PRIMEDST
  */
-// https://www.codechef.com/problems/PRIMEDST
 const int N = 50001;
 vector<int> adj[N];
 int n, k;
@@ -66,8 +66,6 @@ void centroidDecomposition(int u) {
     for(auto v : adj[centroid])if(!visited[v])centroidDecomposition(v);
 }
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(0);
     int tt;
     sieve();
     tt = 1;
