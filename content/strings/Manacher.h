@@ -8,16 +8,34 @@
  */
 #pragma once
 
-array<vi, 2> manacher(const string& s) {
-	int n = sz(s);
-	array<vi,2> p = {vi(n+1), vi(n)};
-	rep(z,0,2) for (int i=0,l=0,r=0; i < n; i++) {
-		int t = r-i+!z;
-		if (i<r) p[z][i] = min(t, p[z][l+t]);
-		int L = i-p[z][i], R = i+p[z][i]-!z;
-		while (L>=1 && R+1<n && s[L-1] == s[R+1])
-			p[z][i]++, L--, R++;
-		if (R>r) l=L, r=R;
-	}
-	return p;
+vector<int> manacher(string t) {
+    string s;
+    for(auto c: t) {
+        s += string("#") + c;
+    }
+    s+="#";
+    int n = s.size();
+    s = "$" + s + "^";
+    vector<int> p(n + 2);
+    int l = 1, r = 1;
+    for(int i = 1; i <= n; i++) {
+        p[i] = max(0, min(r - i, p[l + (r - i)]));
+        while(s[i - p[i]] == s[i + p[i]]) {
+            p[i]++;
+        }
+        if(i + p[i] > r) {
+            l = i - p[i], r = i + p[i];
+        }
+    }
+    return vector<int>(begin(p) + 1, end(p) - 1);
+}
+
+// 0-base indexing
+bool is_palindrome(int l, int r, vector<int> &pal) {
+    l++, r++;
+    int range = (r - l) + 1;
+    l = (l << 1) - 1;
+    r = (r << 1) - 1;
+    int mid = (l + r) >> 1;
+    return pal[mid] >= range; 
 }

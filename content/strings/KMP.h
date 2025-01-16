@@ -10,18 +10,16 @@
  */
 #pragma once
 
-vi pi(const string& s) {
-	vi p(sz(s));
-	rep(i,1,sz(s)) {
-		int g = p[i-1];
-		while (g && s[i] != s[g]) g = p[g-1];
-		p[i] = g + (s[i] == s[g]);
-	}
-	return p;
-}
-vi match(const string& s, const string& pat) {
-	vi p = pi(pat + '\0' + s), res;
-	rep(i,sz(p)-sz(s),sz(p))
-		if (p[i] == sz(pat)) res.push_back(i - 2 * sz(pat));
-	return res;
+vector<int> prefix_function(string s) {
+    int n = (int)s.length();
+    vector<int> pi(n);
+    for (int i = 1; i < n; i++) {
+        int j = pi[i-1];
+        while (j > 0 && s[i] != s[j])
+            j = pi[j-1];
+        if (s[i] == s[j])
+            j++;
+        pi[i] = j;
+    }
+    return pi;
 }
