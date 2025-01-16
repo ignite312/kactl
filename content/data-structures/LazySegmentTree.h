@@ -1,5 +1,5 @@
 /**
- * Author: Tspectre
+ * Author: Emon
  * Description: Segment tree with lazy propagation
  * Time: O(\log N)
  * Usage: update(1, 0, n - 1, ql, qr, val), query(1, 0, n - 1, ql, qr)
