@@ -9,16 +9,7 @@
  */
 #pragma once
 
-/*
-Problem Name: Minimum Euclidean Distance
-Problem Link: https://cses.fi/problemset/task/2194/
-Idea:
-Complexity:
-Resource: https://www.youtube.com/watch?v=kCLGVat2SHk
-*/
-#include<bits/stdc++.h>
-using namespace std;
-#define ll long long
+
 #define pii pair<ll, ll>
 #define ff first
 #define ss second
@@ -26,7 +17,6 @@ using namespace std;
 bool comparex(pii a, pii b) { return a.first < b.first; }
 bool comparey(pii a, pii b) { return a.second < b.second; }
 ll dist(pii x, pii y) { return (x.ff - y.ff) * (x.ff - y.ff) + (x.ss - y.ss) * (x.ss - y.ss); }
-
 pair<pii, pii> closestAmongThree(pii a, pii b, pii c) {
     ll d1 = dist(a, b);
     ll d2 = dist(b, c);
@@ -36,7 +26,6 @@ pair<pii, pii> closestAmongThree(pii a, pii b, pii c) {
     else if (mn == d2) return { b, c };
     else return { a, c };
 }
-
 pair<pii, pii> closest(vector<pii>& points, ll st, ll en) {
     if (st + 1 == en) return { points[st], points[en] };
     if (st + 2 == en) return closestAmongThree(points[st], points[st + 1], points[en]);
@@ -69,13 +58,9 @@ pair<pii, pii> closest(vector<pii>& points, ll st, ll en) {
 
     return ans;
 }
-
 int main() {
-    ios::sync_with_stdio(false);
-    cin.tie(0);
     int tt;
     tt = 1;
-    // cin >> tt;
     while (tt--) {
         int n;
         cin >> n;
