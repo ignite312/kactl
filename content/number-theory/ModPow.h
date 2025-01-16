@@ -1,5 +1,5 @@
 /**
- * Author: Noam527
+ * Author: Emon
  * Date: 2019-04-24
  * License: CC0
  * Source: folklore
@@ -8,11 +8,14 @@
  */
 #pragma once
 
-const ll mod = 1000000007; // faster if const
-
-ll modpow(ll b, ll e, ll mod) {
-	ll ans = 1;
-	for (; e; b = b * b % mod, e /= 2)
-		if (e & 1) ans = ans * b % mod;
-	return ans;
+int bigPow(ll base, ll power, const int mod) {
+    int ans = 1 % mod;
+    base %= mod;
+    if (base < 0) base += mod;
+    while (power) {
+        if (power & 1) ans = (ll) ans * base % mod;
+        base = (ll) base * base % mod;
+        power >>= 1;
+    }
+    return ans;
 }
