@@ -1,51 +1,93 @@
 /**
- * Author: Farhan
+ * Author: Emon
  * Description: Dsu on tree
  */
+#include<bits/stdc++.h>
+using namespace std;
+const int N = 2e5 + 1;
+int color[N+1];
+vector<int> adj[N+1];
+ 
+int idx = 0, euler[N+1], pos[N+1], sz[N+1], H_C[N+1];
+ 
 void dfs(int u, int p) {
-  node[tt] = u;
-  tin[u] = tt++, sz[u] = 1, hc[u] = -1;
-  for (auto v : adj[u]) {
-    if (v != p) {
-      dfs(v, u);
-      sz[u] += sz[v];
-      if (hc[u] == -1 or sz[hc[u]] < sz[v]) {
-        hc[u] = v;
-      }
+    pos[u] = idx;
+    euler[idx++] = u;
+    H_C[u] = -1, sz[u] = 1;
+    for(auto v: adj[u]) {
+        if(v == p)continue;
+        dfs(v, u);
+        sz[u]+=sz[v];
+        if(H_C[u] == -1 || sz[v] > sz[H_C[u]]) {
+            H_C[u] = v;
+        }
     }
-  }
-  tout[u] = tt - 1;
 }
+ 
+int freq[N+1], cur_distinct = 0, distinct[N+1];
+void add(int u) {
+    freq[color[u]]++;
+    if(freq[color[u]] == 1)cur_distinct++;
+}
+ 
+void remove(int u) {
+    freq[color[u]]--;
+    if(freq[color[u]] == 0)cur_distinct--;
+}
+ 
 void dsu(int u, int p, int keep) {
-  for (int v : adj[u]) {
-    if (v != p and v != hc[u]) {
-      dsu(v, u, 0);
+    for(auto v : adj[u]) {
+        if(v == p || v == H_C[u]) continue;
+        dsu(v, u, 0);
     }
-  }
-  if (hc[u] != -1) {
-    dsu(hc[u], u, 1);
-  }
-  for (auto v : adj[u]) {
-    if (v != p and v != hc[u]) {
-      for (int i = tin[v]; i <= tout[v]; ++i) {
-        int w = node[i];
-        // get ans in case of ans is related to simple path or pair
-      }
-      for (int i = tin[v]; i <= tout[v]; ++i) {
-        int w = node[i];
-        // Add contribution of node w
-      }
+    if(H_C[u] != -1) {
+        dsu(H_C[u], u, 1);
     }
-  }
-  // Add contribution of node u
-  // get ans in case ans is related to subtree
-  if (!keep) {
-    for (int i = tin[u]; i <= tout[u]; ++i) {
-      int w = node[i];
-      // remove contribution of node w
+ 
+    for(auto v : adj[u]) {
+        if(v == p || v == H_C[u]) continue;
+        for(int i = pos[v]; i < pos[v] + sz[v]; i++) {
+            add(euler[i]);
+        }
     }
-    // Data structure in initial state (empty contribution)
-  }
+    add(u);
+    distinct[u] = cur_distinct;
+ 
+    if(!keep) {
+        for(int i = pos[u]; i < pos[u] + sz[u]; i++) {
+            remove(euler[i]);
+        }
+    }
 }
-dfs(0, 0);
-dsu(0, 0, 0);
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int tt;
+    tt = 1;
+    // cin >> tt;
+    while(tt--) {
+        int n;
+        cin >> n;
+        map<int, int> compress;
+        int id = 1;
+        for(int i = 1; i <= n; i++) {
+            cin >> color[i];
+            if(compress[color[i]]) color[i] = compress[color[i]];
+            else {
+                compress[color[i]] = id++;
+                color[i] = compress[color[i]];
+            }
+        }
+        for(int i = 0; i < n-1; i++) {
+          int u, v;
+          cin >> u >> v;;
+          adj[u].push_back(v);
+          adj[v].push_back(u);
+        }
+        dfs(1, -1);
+        dsu(1, -1, 1);
+        for(int i = 1; i <= n; i++)cout << distinct[i] << " ";
+    }
+    return 0;
+}

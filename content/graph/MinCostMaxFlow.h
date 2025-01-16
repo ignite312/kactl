@@ -10,74 +10,79 @@
  */
 #pragma once
 
-// #include <bits/extc++.h> /// include-line, keep-include
-
-const ll INF = numeric_limits<ll>::max() / 4;
-
-struct MCMF {
-	struct edge {
-		int from, to, rev;
-		ll cap, cost, flow;
-	};
-	int N;
-	vector<vector<edge>> ed;
-	vi seen;
-	vector<ll> dist, pi;
-	vector<edge*> par;
-	MCMF(int N) : N(N), ed(N), seen(N), dist(N), pi(N), par(N) {}
-	void addEdge(int from, int to, ll cap, ll cost) {
-		if (from == to) return;
-		ed[from].push_back(edge{ from,to,sz(ed[to]),cap,cost,0 });
-		ed[to].push_back(edge{ to,from,sz(ed[from])-1,0,-cost,0 });
-	}
-	void path(int s) {
-		fill(all(seen), 0);
-		fill(all(dist), INF);
-		dist[s] = 0; ll di;
-		__gnu_pbds::priority_queue<pair<ll, int>> q;
-		vector<decltype(q)::point_iterator> its(N);
-		q.push({ 0, s });
-		while (!q.empty()) {
-			s = q.top().second; q.pop();
-			seen[s] = 1; di = dist[s] + pi[s];
-			for (edge& e : ed[s]) if (!seen[e.to]) {
-				ll val = di - pi[e.to] + e.cost;
-				if (e.cap - e.flow > 0 && val < dist[e.to]) {
-					dist[e.to] = val;
-					par[e.to] = &e;
-					if (its[e.to] == q.end())
-						its[e.to] = q.push({ -dist[e.to], e.to });
-					else
-						q.modify(its[e.to], { -dist[e.to], e.to });
-				}
-			}
-		}
-		rep(i,0,N) pi[i] = min(pi[i] + dist[i], INF);
-	}
-	pair<ll, ll> maxflow(int s, int t) {
-		ll totflow = 0, totcost = 0;
-		while (path(s), seen[t]) {
-			ll fl = INF;
-			for (edge* x = par[t]; x; x = par[x->from])
-				fl = min(fl, x->cap - x->flow);
-			totflow += fl;
-			for (edge* x = par[t]; x; x = par[x->from]) {
-				x->flow += fl;
-				ed[x->to][x->rev].flow -= fl;
-			}
-		}
-		rep(i,0,N) for(edge& e : ed[i]) totcost += e.cost * e.flow;
-		return {totflow, totcost/2};
-	}
-	// If some costs can be negative, call this before maxflow:
-	void setpi(int s) { // (otherwise, leave this out)
-		fill(all(pi), INF); pi[s] = 0;
-		int it = N, ch = 1; ll v;
-		while (ch-- && it--)
-			rep(i,0,N) if (pi[i] != INF)
-			  for (edge& e : ed[i]) if (e.cap)
-				  if ((v = pi[i] + e.cost) < pi[e.to])
-					  pi[e.to] = v, ch = 1;
-		assert(it >= 0); // negative cost cycle
-	}
-};
+const int N = 500;
+vector<int> adj[N+1];
+int capacity[N+1][N+1];
+ 
+int bfs(int s, int d, int n, vector<int> &parent) {
+    parent.assign(n+1, -1);
+    parent[s] = 0;
+    queue<pair<int, int>> q;
+    q.push({s, INT_MAX});
+    while(!q.empty()) {
+        int u = q.front().first;
+        int f =  q.front().second;
+        q.pop();
+        for(auto v : adj[u]) {
+            if(parent[v] == -1 && capacity[u][v]) {
+                parent[v] = u;
+                int n_f = min(f, capacity[u][v]);
+                if(v == d)return n_f;
+                q.push({v, n_f});
+            }
+        }
+    }
+    return 0;
+}
+int max_flow(int s, int d, int n) {
+    int mx_flow = 0;
+    vector<int> parent;
+    int flow;
+    while(flow = bfs(s, d, n, parent)) {
+        mx_flow+=flow;
+        int now = d;
+        while(now != s) {
+            int prev = parent[now];
+            capacity[prev][now] -= flow;
+            capacity[now][prev] += flow;
+            now = prev;
+        }
+    }
+    return mx_flow;
+}
+bool visited[N+1];
+void dfs(int u) {
+    visited[u] = true;
+    for(auto v : adj[u])if(!visited[v] && capacity[u][v])dfs(v);
+}
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int tt;
+    tt = 1;
+    // cin >> tt;
+    while(tt--) {
+        int n, m;
+        cin >> n >> m;
+        for(int i = 0; i < m; i++) {
+            int u, v;
+            cin >> u >> v;
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+            capacity[u][v] += 1;
+            capacity[v][u] += 1;
+        }
+        cout << max_flow(1, n, n) << "\n";
+        dfs(1);
+        for(int u = 1; u <= n; u++) {
+            if(visited[u]) {
+                for(auto v : adj[u]) {
+                    if(!visited[v]) {
+                        cout << u << " " << v << "\n";
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}

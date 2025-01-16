@@ -1,12 +1,9 @@
 /**
- * Author: Farhan
+ * Author: Emon
  * Description: Heavy Light Decomposition
  */
 /*
-Problem Name: Path Queries II
 Problem Link: https://cses.fi/problemset/task/2134
-Idea: Heavy Light Decomposition
-Complexity: O(Nlog^2N)
 */
 #include<bits/stdc++.h>
 using namespace std;

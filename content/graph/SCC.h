@@ -15,26 +15,32 @@
  */
 #pragma once
 
-vi val, comp, z, cont;
-int Time, ncomps;
-template<class G, class F> int dfs(int j, G& g, F& f) {
-	int low = val[j] = ++Time, x; z.push_back(j);
-	for (auto e : g[j]) if (comp[e] < 0)
-		low = min(low, val[e] ?: dfs(e,g,f));
-	if (low == val[j]) {
-		do {
-			x = z.back(); z.pop_back();
-			comp[x] = ncomps;
-			cont.push_back(x);
-		} while (x != j);
-		f(cont); cont.clear();
-		ncomps++;
-	}
-	return val[j] = low;
-}
-template<class G, class F> void scc(G& g, F f) {
-	int n = sz(g);
-	val.assign(n, 0); comp.assign(n, -1);
-	Time = ncomps = 0;
-	rep(i,0,n) if (comp[i] < 0) dfs(i, g, f);
-}
+struct SCC {
+    // 1-base indexing
+    int n;
+    vector<vector<int>> adj, radj;
+    vector<int> todo, comps, id;
+    vector<bool> vis;
+    void init(int _n) {
+        n = _n;
+        adj.resize(n+1), radj.resize(n+1), id.assign(n+1, -1), vis.resize(n+1);
+    }
+    void build(int x, int y) { adj[x].push_back(y), radj[y].push_back(x); }
+    void dfs(int x) {
+        vis[x] = 1;
+        for(auto y : adj[x]) if (!vis[y]) dfs(y);
+        todo.push_back(x);
+    }
+    void dfs2(int x, int v) {
+        id[x] = v;
+        for(auto y : radj[x]) if (id[y] == -1) dfs2(y, v);
+    }
+    void gen() {
+        for(int i = 1; i <= n; i++) if (!vis[i]) dfs(i);
+        reverse(todo.begin(), todo.end());
+        for(auto x : todo) if (id[x] == -1) {
+            dfs2(x, x);
+            comps.push_back(x);
+        }
+    }
+} scc;
