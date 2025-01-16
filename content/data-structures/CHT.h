@@ -1,12 +1,12 @@
 /**
- * Author: Simon Lindholm
- * Date: 2017-04-20
- * License: CC0
- * Source: own work
+ * Author: Emon
+ * Date: 
+ * License: 
+ * Source: 
  * Description: Container where you can add lines of the form kx+m, and query minimum values at points x.
  *  Useful for dynamic programming (``convex hull trick'').
  * Time: O(\log N)
- * Status: stress-tested
+ * Status:
  */
 #pragma once
 

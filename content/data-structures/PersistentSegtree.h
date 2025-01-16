@@ -1,10 +1,11 @@
 /**
- * Author: Farhan
- * Date: 2015-02-06
- * License: CC0
- * Source: Folklore
+ * Author: Emon
+ * Date: 
+ * License: 
+ * Source: 
  * Description: PresistentSegment Tree
  */
+#pragma once
 
 struct persistentSegtree {
     // 0 base indexing
@@ -49,9 +50,36 @@ struct persistentSegtree {
         return merge(left->query(i, j, l, mid), right->query(i, j, mid+1, r));
     }
 } *roots[N];
-
-roots[0] = new persistentSegtree();
-roots[k++]->build(a, 0, n-1);
-roots[_k] = roots[_k]->update(--i, x, 0, n-1);
-cout << roots[--_k]->query(--i, --j, 0, n-1) << "\n";
-roots[k++] = roots[--_k];
+int main() {// Idea from Mahmudul Yeamim
+    int tt = 1;
+    while(tt--) {
+        int n, q, k = 0;
+        cin >> n >> q;
+        vector<ll> a(n);
+        for(int i = 0; i < n; i++) {
+            cin >> a[i];
+        }
+        roots[0] = new persistentSegtree();
+        roots[k++]->build(a, 0, n-1);
+        while(q--) {
+            int type;
+            cin >> type;
+            if(type == 1) {
+                int _k, i;
+                ll x;
+                cin >> _k >> i >> x;
+                --_k;
+                roots[_k] = roots[_k]->update(--i, x, 0, n-1);
+            }else if(type == 2) {
+                int _k, i, j;
+                cin >> _k >> i >> j;
+                cout << roots[--_k]->query(--i, --j, 0, n-1) << "\n";
+            }else {
+                int _k;
+                cin >> _k;
+                roots[k++] = roots[--_k];
+            }
+        }
+    }
+    return 0;
+}
