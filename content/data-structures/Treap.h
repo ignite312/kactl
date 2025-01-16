@@ -9,5 +9,3 @@
  * Status: stress-tested
  */
 #pragma once
-
-
