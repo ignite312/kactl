@@ -13,7 +13,7 @@
  */
 #pragma once
 
-struct ST {
+struct RMQ {
     // 0-base indexing
   int n, logN;
   vector<vector<int>> st;

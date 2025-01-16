@@ -14,7 +14,6 @@ struct FenwickTree {
     // 0 base indexing
     vector<int> bit;
     int n;
-
     FenwickTree(int n) {
         this->n = n;
         bit.assign(n, 0);

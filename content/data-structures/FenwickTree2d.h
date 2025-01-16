@@ -10,8 +10,6 @@
  */
 #pragma once
 
-#include "FenwickTree.h"
-
 struct FenwickTree2D {
     // 0 base indexing
     vector<vector<int>> bit;
