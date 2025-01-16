@@ -1,5 +1,5 @@
 /**
- * Author: Lucian Bicsi
+ * Author: Emon
  * Date: 2017-10-31
  * License: CC0
  * Source: folklore
@@ -14,7 +14,6 @@ struct Segtree {
     // 0 base indexing
     int n;
     vector<ll> tree;
- 
     ll merge(ll x, ll y) {
         return x + y;
     }

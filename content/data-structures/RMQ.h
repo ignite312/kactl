@@ -1,6 +1,6 @@
 /**
- * Author: Johan Sannemo, pajenegod
- * Date: 2015-02-06
+ * Author: Emon
+ * Date: 
  * License: CC0
  * Source: Folklore
  * Description: Range Minimum Queries on an array. Returns
@@ -24,13 +24,10 @@ struct RMQ {
     logN = ceil(log2(n));
     st.resize(logN, vector<int>(n));
     lg.resize(n + 1);
- 
     lg[1] = 0;
     for (int i = 2; i <= n; i++)
       lg[i] = lg[i / 2] + 1;
- 
     copy(array.begin(), array.end(), st[0].begin());
- 
     for (int i = 1; i < logN; i++) {
       for (int j = 0; j + (1 << i) <= n; j++) {
         st[i][j] = min(st[i - 1][j], st[i - 1][j + (1 << (i - 1))]);
