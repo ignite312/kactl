@@ -13,19 +13,32 @@
  */
 #pragma once
 
-template<class T>
-struct RMQ {
-	vector<vector<T>> jmp;
-	RMQ(const vector<T>& V) : jmp(1, V) {
-		for (int pw = 1, k = 1; pw * 2 <= sz(V); pw *= 2, ++k) {
-			jmp.emplace_back(sz(V) - pw * 2 + 1);
-			rep(j,0,sz(jmp[k]))
-				jmp[k][j] = min(jmp[k - 1][j], jmp[k - 1][j + pw]);
-		}
-	}
-	T query(int a, int b) {
-		assert(a < b); // or return inf if a == b
-		int dep = 31 - __builtin_clz(b - a);
-		return min(jmp[dep][a], jmp[dep][b - (1 << dep)]);
-	}
-};
+struct ST {
+    // 0-base indexing
+  int n, logN;
+  vector<vector<int>> st;
+  vector<int> lg;
+ 
+  void init(const vector<int>& array) {
+    n = array.size();
+    logN = ceil(log2(n));
+    st.resize(logN, vector<int>(n));
+    lg.resize(n + 1);
+ 
+    lg[1] = 0;
+    for (int i = 2; i <= n; i++)
+      lg[i] = lg[i / 2] + 1;
+ 
+    copy(array.begin(), array.end(), st[0].begin());
+ 
+    for (int i = 1; i < logN; i++) {
+      for (int j = 0; j + (1 << i) <= n; j++) {
+        st[i][j] = min(st[i - 1][j], st[i - 1][j + (1 << (i - 1))]);
+      }
+    }
+  }
+  int query(int L, int R) {
+    int i = lg[R - L + 1];
+    return min(st[i][L], st[i][R - (1 << i) + 1]);
+  }
+} ST;
