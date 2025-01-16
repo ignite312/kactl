@@ -1,65 +1,144 @@
 /**
- * Author: Benjamin Qi, Oleksandr Kulkov, chilli
- * Date: 2020-01-12
- * License: CC0
- * Source: https://codeforces.com/blog/entry/53170, https://github.com/bqi343/USACO/blob/master/Implementations/content/graphs%20(12)/Trees%20(10)/HLD%20(10.3).h
- * Description: Decomposes a tree into vertex disjoint heavy paths and light
- * edges such that the path from any leaf to the root contains at most log(n)
- * light edges. Code does additive modifications and max queries, but can
- * support commutative segtree modifications/queries on paths and subtrees.
- * Takes as input the full adjacency list. VALS\_EDGES being true means that
- * values are stored in the edges, as opposed to the nodes. All values
- * initialized to the segtree default. Root must be 0.
- * Time: O((\log N)^2)
- * Status: stress-tested against old HLD
+ * Author: Farhan
+ * Description: Heavy Light Decomposition
  */
-#pragma once
+/*
+Problem Name: Path Queries II
+Problem Link: https://cses.fi/problemset/task/2134
+Idea: Heavy Light Decomposition
+Complexity: O(Nlog^2N)
+*/
+#include<bits/stdc++.h>
+using namespace std;
+const int N = 2e5 + 1;
+int values[N+1], subtree[N+1], parent[N+1], depth[N+1];
+int heavy[N+1], head[N+1], id[N+1];
+vector<int> adj[N+1];
+ 
+// 0 Base indexing
+struct Segtree {
+    int size;
+    vector<int> tree;
 
-#include "../data-structures/LazySegmentTree.h"
-
-template <bool VALS_EDGES> struct HLD {
-	int N, tim = 0;
-	vector<vi> adj;
-	vi par, siz, rt, pos;
-	Node *tree;
-	HLD(vector<vi> adj_)
-		: N(sz(adj_)), adj(adj_), par(N, -1), siz(N, 1),
-		  rt(N),pos(N),tree(new Node(0, N)){ dfsSz(0); dfsHld(0); }
-	void dfsSz(int v) {
-		if (par[v] != -1) adj[v].erase(find(all(adj[v]), par[v]));
-		for (int& u : adj[v]) {
-			par[u] = v;
-			dfsSz(u);
-			siz[v] += siz[u];
-			if (siz[u] > siz[adj[v][0]]) swap(u, adj[v][0]);
-		}
-	}
-	void dfsHld(int v) {
-		pos[v] = tim++;
-		for (int u : adj[v]) {
-			rt[u] = (u == adj[v][0] ? rt[v] : u);
-			dfsHld(u);
-		}
-	}
-	template <class B> void process(int u, int v, B op) {
-		for (; rt[u] != rt[v]; v = par[rt[v]]) {
-			if (pos[rt[u]] > pos[rt[v]]) swap(u, v);
-			op(pos[rt[v]], pos[v] + 1);
-		}
-		if (pos[u] > pos[v]) swap(u, v);
-		op(pos[u] + VALS_EDGES, pos[v] + 1);
-	}
-	void modifyPath(int u, int v, int val) {
-		process(u, v, [&](int l, int r) { tree->add(l, r, val); });
-	}
-	int queryPath(int u, int v) { // Modify depending on problem
-		int res = -1e9;
-		process(u, v, [&](int l, int r) {
-				res = max(res, tree->query(l, r));
-		});
-		return res;
-	}
-	int querySubtree(int v) { // modifySubtree is similar
-		return tree->query(pos[v] + VALS_EDGES, pos[v] + siz[v]);
-	}
-};
+    int merge(int x, int y) {
+        return max(x, y);
+    }
+    void build(vector<int> &a, int node, int l, int r) {
+        if(l == r) {
+            tree[node] = a[l];
+            return;
+        }
+        int mid = l + (r - l)/2;
+        build(a, node*2+1, l, mid);
+        build(a, node*2+2, mid+1, r);
+        tree[node] = merge(tree[node*2+1], tree[node*2+2]);
+    }
+    void update(int i, int value, int node, int l, int r) {
+        if(l == i && r == i) {
+            tree[node] = value;
+            return;
+        }
+        int mid = l + (r-l)/2;
+        if(i <= mid)update(i, value, node*2+1, l, mid);
+        else update(i, value, node*2+2, mid+1, r);
+        tree[node] = merge(tree[node*2+1], tree[node*2+2]);
+    }
+    void update(int i, int value) {
+        update(i, value, 0, 0, size-1);
+    }
+    int query(int i, int j, int node, int l, int r) {
+        if(l > j || r < i) return INT_MIN;
+        if(l >= i && r <= j)return tree[node];
+        int mid = l + (r - l)/2;
+        return merge(query(i, j, node*2+1, l, mid), query(i, j, node*2+2, mid+1, r));
+    }
+    int query(int i, int j) {
+        return query(i, j, 0, 0, size-1);
+    }
+    int sz(int n) {
+        int size = 1;
+        while(size < n) size = size << 1;
+        return 2*size-1;
+    }
+    void init(vector<int> &a, int n) {
+        size = 1;
+        while(size < n) size = size << 1;
+        tree.resize(2*size-1);
+        build(a, 0, 0, size-1);
+    }
+} st;
+ 
+void dfs(int u, int p) {
+  subtree[u] = 1;
+  int mx = 0;
+  for(auto v : adj[u]) {
+    if(v == p)continue;
+    parent[v] = u;
+    depth[v] = depth[u]+1;
+    dfs(v, u);
+    subtree[v]+=subtree[u];
+    if(subtree[v] > mx) {
+      mx = subtree[v];
+      heavy[u] = v;
+    }
+  }
+}
+int idx = 0;
+void HLD(int u, int h) {
+  head[u] = h;
+  id[u] = idx++;
+  if(heavy[u])HLD(heavy[u], h);
+  for(auto v : adj[u]) {
+    if(v != parent[u] && v != heavy[u]) {
+      HLD(v, v);
+    }
+  }
+}
+int path(int x, int y) {
+  int ans = 0;
+  while(head[x] != head[y]) {
+    if(depth[head[x]] > depth[head[y]]) swap(x, y);
+    ans = max(ans, st.query(id[head[y]], id[y]));
+    y = parent[head[y]];
+  }
+  if(depth[x] > depth[y])swap(x, y);
+  ans = max(ans, st.query(id[x], id[y]));
+  return ans;
+}
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int tt;
+    tt = 1;
+    // cin >> tt;
+    while(tt--) {
+        int n, q;
+        cin >> n >> q;
+        for(int i = 0; i < n; i++)cin >> values[i];
+        for(int i = 0; i < n-1; i++) {
+          int u, v;
+          cin >> u >> v;
+          adj[u].push_back(v);
+          adj[v].push_back(u);
+        }
+        dfs(1, -1);
+        HLD(1, 1);
+        vector<int> a(n);
+        for(int i = 0; i < n; i++)a[id[i+1]] = values[i];
+        st.init(a, n);
+        while(q--) {
+          int type;
+          cin >> type;
+          if(type == 1) {
+            int s, x;
+            cin >> s >> x;
+            st.update(id[s], x);
+          }else {
+            int a, b;
+            cin >> a >> b;
+            cout << path(a, b) << " ";
+          }
+        }
+    }
+    return 0;
+}

@@ -12,25 +12,39 @@
 
 #include "FenwickTree.h"
 
-struct FT2 {
-	vector<vi> ys; vector<FT> ft;
-	FT2(int limx) : ys(limx) {}
-	void fakeUpdate(int x, int y) {
-		for (; x < sz(ys); x |= x + 1) ys[x].push_back(y);
-	}
-	void init() {
-		for (vi& v : ys) sort(all(v)), ft.emplace_back(sz(v));
-	}
-	int ind(int x, int y) {
-		return (int)(lower_bound(all(ys[x]), y) - ys[x].begin()); }
-	void update(int x, int y, ll dif) {
-		for (; x < sz(ys); x |= x + 1)
-			ft[x].update(ind(x, y), dif);
-	}
-	ll query(int x, int y) {
-		ll sum = 0;
-		for (; x; x &= x - 1)
-			sum += ft[x-1].query(ind(x-1, y));
-		return sum;
-	}
+struct FenwickTree2D {
+    // 0 base indexing
+    vector<vector<int>> bit;
+    int n, m;
+    FenwickTree2D(int n, int m) {
+        this->n = n;
+        this->m = m;
+        bit.assign(n, vector<int>(m, 0));
+    }
+    FenwickTree2D(vector<vector<int>>& matrix) : FenwickTree2D(matrix.size(), matrix[0].size()) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                add(i, j, matrix[i][j]);
+            }
+        }
+    }
+    int sum(int x, int y) {
+        int ret = 0;
+        for (int i = x; i >= 0; i = (i & (i + 1)) - 1) {
+            for (int j = y; j >= 0; j = (j & (j + 1)) - 1) {
+                ret += bit[i][j];
+            }
+        }
+        return ret;
+    }
+    int sum(int x1, int y1, int x2, int y2) {
+        return sum(x2, y2) - sum(x2, y1 - 1) - sum(x1 - 1, y2) + sum(x1 - 1, y1 - 1);
+    }
+    void add(int x, int y, int delta) {
+        for (int i = x; i < n; i = i | (i + 1)) {
+            for (int j = y; j < m; j = j | (j + 1)) {
+                bit[i][j] += delta;
+            }
+        }
+    }
 };

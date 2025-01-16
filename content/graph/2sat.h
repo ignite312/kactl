@@ -19,59 +19,83 @@
  */
 #pragma once
 
-struct TwoSat {
-	int N;
-	vector<vi> gr;
-	vi values; // 0 = false, 1 = true
+struct _2SAT {
+    // 0-base indexing
+    int n;
+    vector<vector<int>> adj, radj;
+    vector<int> todo, comps, id;
+    vector<bool> vis, assignment;
+    void init(int _n) {
+        n = _n;
+        adj.resize(n), radj.resize(n), id.assign(n, -1), vis.resize(n);
+        assignment.assign(n/2, false);
+    }
+    void build(int x, int y) { adj[x].push_back(y), radj[y].push_back(x);}
+    void dfs1(int x) {
+        vis[x] = 1;
+        for(auto y : adj[x]) if (!vis[y]) dfs1(y);
+        todo.push_back(x);
+    }
+    void dfs2(int x, int v) {
+        id[x] = v;
+        for(auto y : radj[x]) if (id[y] == -1) dfs2(y, v);
+    }
+    bool solve_2SAT() {
+        for(int i = 0; i < n; i++) if (!vis[i]) dfs1(i);
+        reverse(todo.begin(), todo.end());
+        int j = 0;
+        for(auto x : todo) if (id[x] == -1) {
+            dfs2(x, j++);
+            // comps.push_back(x);
+        }
+        for (int i = 0; i < n; i += 2) {
+            if (id[i] == id[i + 1]) {
+                return false;
+            }
+            assignment[i / 2] = id[i] > id[i + 1];
+        }
+        return true;
+    }
+    void add_disjunction(int a, bool na, int b, bool nb) {
+        // na and nb signify whether a and b are to be negated 
+        a = 2 * a ^ na;
+        b = 2 * b ^ nb;
+        int neg_a = a ^ 1;
+        int neg_b = b ^ 1;
+        build(neg_a, b);
+        build(neg_b, a);
+    }
+} _2sat;
 
-	TwoSat(int n = 0) : N(n), gr(2*n) {}
-
-	int addVar() { // (optional)
-		gr.emplace_back();
-		gr.emplace_back();
-		return N++;
-	}
-
-	void either(int f, int j) {
-		f = max(2*f, -1-2*f);
-		j = max(2*j, -1-2*j);
-		gr[f].push_back(j^1);
-		gr[j].push_back(f^1);
-	}
-	void setValue(int x) { either(x, x); }
-
-	void atMostOne(const vi& li) { // (optional)
-		if (sz(li) <= 1) return;
-		int cur = ~li[0];
-		rep(i,2,sz(li)) {
-			int next = addVar();
-			either(cur, ~li[i]);
-			either(cur, next);
-			either(~li[i], next);
-			cur = ~next;
-		}
-		either(cur, ~li[1]);
-	}
-
-	vi val, comp, z; int time = 0;
-	int dfs(int i) {
-		int low = val[i] = ++time, x; z.push_back(i);
-		for(int e : gr[i]) if (!comp[e])
-			low = min(low, val[e] ?: dfs(e));
-		if (low == val[i]) do {
-			x = z.back(); z.pop_back();
-			comp[x] = low;
-			if (values[x>>1] == -1)
-				values[x>>1] = x&1;
-		} while (x != i);
-		return val[i] = low;
-	}
-
-	bool solve() {
-		values.assign(N, -1);
-		val.assign(2*N, 0); comp = val;
-		rep(i,0,2*N) if (!comp[i]) dfs(i);
-		rep(i,0,N) if (comp[2*i] == comp[2*i+1]) return 0;
-		return 1;
-	}
-};
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int tt;
+    tt = 1;
+    // cin >> tt;
+    while(tt--) {
+        int n, m;
+        cin >> n >> m;
+        _2sat.init(m*2);
+        for(int i = 0; i < n; i++) {
+          int a, b;
+          char _na, _nb;
+          cin >> _na >> a >> _nb >> b;
+          bool na, nb;
+          --a, --b;
+          if(_na == '+')na = false;
+          else na = true;
+          if(_nb == '+')nb = false;
+          else nb = true;
+          _2sat.add_disjunction(a, na, b, nb);
+        }
+        bool possible = _2sat.solve_2SAT();
+        if(possible) {
+          for(int i = 0; i < m; i++) {
+            if(_2sat.assignment[i])cout <<"+ ";
+            else cout << "- ";
+          }
+        }else cout << "IMPOSSIBLE";
+    }
+    return 0;
+}
